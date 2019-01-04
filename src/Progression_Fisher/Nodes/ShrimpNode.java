@@ -29,7 +29,7 @@ public class ShrimpNode extends Node {
         switch (status) {
             case "Tutorial Island Dropoff":
                 c.log("Dropping off inventory");
-                if (c.getSkills().getExperience(Skill.FISHING) > 30 && c.getInventory().contains(SMALL_NET)) {
+                if (c.getInventory().emptySlotCount()>10 && c.getInventory().contains(SMALL_NET)) {
                     status = "Walk to Shrimp";
                     break;
                 }
@@ -37,6 +37,8 @@ public class ShrimpNode extends Node {
                 MethodProvider.sleep(400, 700);
                 if (c.getBank().isOpen()) {
                     c.getBank().depositAllExcept(SMALL_NET);
+                    c.sleep(500,700);
+                    c.getBank().close();
                 }
                 break;
 
@@ -52,7 +54,7 @@ public class ShrimpNode extends Node {
 
             case "Fish Shrimp":
                 c.log("Fishing Shrimp");
-                if (shrimpArea.contains(c.getLocalPlayer()) && c.getInventory().isFull() && c.getInventory().count("Coins") > 25) {
+                if (shrimpArea.contains(c.getLocalPlayer()) && c.getInventory().isFull() && c.getInventory().count("Coins") > 5) {
                     status = "Drop Shrimp";
                     break;
                 } else if (c.getInventory().isFull()) {
