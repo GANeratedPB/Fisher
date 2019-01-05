@@ -1,6 +1,5 @@
 package Progression_Fisher;
 
-import Progression_Fisher.Nodes.FlyNode;
 import Progression_Fisher.Nodes.ShrimpNode;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.map.Area;
@@ -20,13 +19,12 @@ public class Fighter_main extends AbstractScript {
     private long BREAK_TIME = 0L;
     private long PLAY_TIME = 0L;
 
-
     private long elapsedPlayTime = 0L;
 
-    private String State = "Play";
+    private String state = "Play";
+    private String status = "";
 
     private Node[] nodes;
-    private Timer timer;
 
 
     @Override
@@ -37,58 +35,47 @@ public class Fighter_main extends AbstractScript {
         BREAK_TIME = updatedTime(5, 25);
         nodes = new Node[]{
                 new ShrimpNode(this),
-                new FlyNode(this),
-
         };
-        log("-------------------------------------------");
-        log("Break time duration: " + Timer.formatTime(BREAK_TIME));
-        log("Play time duration: " + Timer.formatTime(PLAY_TIME));
-        log("-------------------------------------------");
     }
 
     @Override
     public int onLoop() {
 
 
-        switch (State) {
+        switch (state) {
             case "Play":
                 elapsedPlayTime = Calculations.elapsed(START_TIME);
-                log("Time till break: " + Timer.formatTime(PLAY_TIME - elapsedPlayTime));
                 // Once play time is up
                 if (elapsedPlayTime > PLAY_TIME) {
                     PLAY_TIME = updatedTime(15, 50);
                     START_TIME = System.currentTimeMillis();
-                    State = "Logout";
+                    state = "Logout";
                 }
                 for (Node node : nodes) {
-                    elapsedPlayTime = Calculations.elapsed(START_TIME);
                     if (node.validate()) {
                         return node.execute();
                     }
                 }
-                log("No node valid, somethings wrong");
                 break;
 
             case "Break":
                 long elapsedBreakTime = Calculations.elapsed(START_TIME);
-                log("Breaking now");
-                log("Time till play: " + Timer.formatTime(BREAK_TIME - elapsedBreakTime));
                 if (elapsedBreakTime > BREAK_TIME) {
                     BREAK_TIME = updatedTime(5, 25);
                     START_TIME = System.currentTimeMillis();
-                    State = "Login";
+                    state = "Login";
                 }
                 break;
 
             case "Logout":
                 disableEvent(RandomEvent.LOGIN);
                 getTabs().logout();
-                State = "Break";
+                state = "Break";
                 break;
 
             case "Login":
                 enableEvent(RandomEvent.LOGIN);
-                State = "Play";
+                state = "Play";
                 break;
 
         }
@@ -99,9 +86,11 @@ public class Fighter_main extends AbstractScript {
     @Override
     public void onPaint(Graphics g) {
         super.onPaint(g);
-        g.setColor(Color.GREEN);
+        g.setColor(Color.CYAN);
         g.setFont(new Font("Arial", Font.PLAIN, 12));
+
         g.drawString("Time till Break : " + Timer.formatTime(PLAY_TIME - elapsedPlayTime), 10, 35);
+        g.drawString("Current Status: " + status, 10, 55);
     }
 
     private void disableEvent(RandomEvent event) {
@@ -123,8 +112,20 @@ public class Fighter_main extends AbstractScript {
 
     public void walkTo(Area area, int minSleep, int maxSleep) {
         if (getWalking().walk(area.getRandomTile())) {
-            sleep(minSleep, maxSleep);
+            sleepUntil(() -> {
+                sleep(1000);
+                return getLocalPlayer().isStandingStill() || !getLocalPlayer().isAnimating();
+            }, Calculations.random(minSleep, maxSleep));
         }
 
     }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
 }

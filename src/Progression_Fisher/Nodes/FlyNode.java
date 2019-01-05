@@ -25,9 +25,11 @@ public class FlyNode extends Node {
         super(c);
     }
 
+
     @Override
     public boolean validate() {
-        return (c.getSkills().getRealLevel(Skill.FISHING) >= 20);
+        // check that fish lvl is equal to or greater than 20 and one has 1000 feathers
+        return (c.getSkills().getRealLevel(Skill.FISHING) >= 20 && c.getInventory().count(FEATHERS)>1000);
     }
 
     @Override
@@ -147,7 +149,7 @@ public class FlyNode extends Node {
                     status = "Bank fish";
                     break;
                 } else if (!flyArea.contains(c.getLocalPlayer())) {
-                    c.walkTo(flyArea, 3000,5000);
+                    c.walkTo(flyArea, 3000, 5000);
 
                 } else {
                     NPC flySpot = c.getNpcs().closest("Rod Fishing spot");

@@ -1,5 +1,7 @@
 package Progression_Fisher;
 
+import org.dreambot.api.methods.MethodProvider;
+
 public abstract class Node {
     protected final Fighter_main c;
 
