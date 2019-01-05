@@ -23,7 +23,7 @@ public class ShrimpNode extends Node {
     @Override
     public boolean validate() {
         // fishing level is under 20
-        return (c.getSkills().getRealLevel(Skill.FISHING) < 30);
+        return (c.getSkills().getRealLevel(Skill.FISHING) < 20);
     }
 
     @Override

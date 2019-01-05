@@ -1,5 +1,7 @@
 package Progression_Fisher;
 
+import Progression_Fisher.Nodes.ChickenNode;
+import Progression_Fisher.Nodes.FlyNode;
 import Progression_Fisher.Nodes.ShrimpNode;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.map.Area;
@@ -35,6 +37,8 @@ public class Fighter_main extends AbstractScript {
         BREAK_TIME = updatedTime(5, 25);
         nodes = new Node[]{
                 new ShrimpNode(this),
+                new ChickenNode(this),
+                new FlyNode(this)
         };
     }
 
