@@ -1,6 +1,6 @@
 package Progression_Fisher.Nodes;
 
-import Progression_Fisher.Fighter_main;
+import Progression_Fisher.Fisher_Main;
 import Progression_Fisher.Node;
 import org.dreambot.api.methods.MethodProvider;
 import org.dreambot.api.methods.container.impl.equipment.EquipmentSlot;
@@ -10,26 +10,43 @@ import org.dreambot.api.wrappers.interactive.NPC;
 import org.dreambot.api.wrappers.items.GroundItem;
 
 public class ChickenNode extends Node {
-    public static String status = "check weapons";
+    public static String status = "check inventory";
     public static final String FEATHERS = "Feather";
     public static final String WOODEN_SHIELD = "Wooden shield";
     public static final String BRONZE_SWORD = "Bronze sword";
 
     Area chickenArea = new Area(3020, 3296, 3014, 3282, 0);
 
-    public ChickenNode(Fighter_main main) {
+    public ChickenNode(Fisher_Main main) {
         super(main);
     }
 
     @Override
     public boolean validate() {
-        // fishing lvl is greater than or equal to 20 and less than 1k feathers in inventory
-        return (c.getSkills().getRealLevel(Skill.FISHING) >= 20 && c.getInventory().count(FEATHERS) <= 200);
+        // fishing lvl is greater than or equal to 20
+        return (c.getSkills().getRealLevel(Skill.FISHING) >= 20 && c.isCollectFeathers());
     }
 
     @Override
     public int execute() {
+        if (c.getInventory().count(FEATHERS) > 500) {
+            c.setCollectFeathers(false);
+        }
         switch (status) {
+            case "check inventory":
+                c.setStatus("Checking to bank all fish");
+                if (!c.getInventory().contains("Raw trout", "Raw Salmon")) {
+                    status = "check weapons";
+                    break;
+                } else {
+                    c.getBank().openClosest();
+                    MethodProvider.sleep(500, 1000);
+                    if (c.getBank().isOpen()) {
+                        c.getBank().depositAllExcept(FEATHERS);
+                        c.getBank().close();
+                    }
+                    break;
+                }
             case "check weapons":
                 c.setStatus("Checking for weapon and shield");
                 if (!c.getEquipment().isSlotEmpty(EquipmentSlot.WEAPON.getSlot()) && !c.getEquipment().isSlotEmpty(EquipmentSlot.SHIELD.getSlot())) {
@@ -62,11 +79,8 @@ public class ChickenNode extends Node {
                     break;
                 }
             case "kill chickens":
-                c.log("Killing chickens for feathers");
-                if (c.getInventory().count(FEATHERS) > 1000) {
-                    System.out.println("here");
-                    status = "Get fly rod";
-                } else if (!chickenArea.contains(c.getLocalPlayer())) {
+                c.setStatus("Killing chickens for feathers");
+                if (!chickenArea.contains(c.getLocalPlayer())) {
                     c.getWalking().walk(chickenArea.getRandomTile());
                     MethodProvider.sleep(500, 800);
                 } else {

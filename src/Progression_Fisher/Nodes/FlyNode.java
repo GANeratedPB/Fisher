@@ -1,6 +1,6 @@
 package Progression_Fisher.Nodes;
 
-import Progression_Fisher.Fighter_main;
+import Progression_Fisher.Fisher_Main;
 import Progression_Fisher.Node;
 import org.dreambot.api.methods.MethodProvider;
 import org.dreambot.api.methods.map.Area;
@@ -9,7 +9,7 @@ import org.dreambot.api.wrappers.interactive.NPC;
 import org.dreambot.api.wrappers.widgets.WidgetChild;
 
 public class FlyNode extends Node {
-    Area flyArea = new Area(3109, 3434, 3105, 3431, 0);
+    Area flyArea = new Area(3109, 3434, 3099, 3424, 0);
     Area fishingStoreArea = new Area(3016, 3229, 3012, 3223, 0);
     Area chickenArea = new Area(3020, 3296, 3014, 3282, 0);
 
@@ -20,7 +20,7 @@ public class FlyNode extends Node {
     public static final String ROD = "Fly fishing rod";
     public static final String FEATHERS = "Feather";
 
-    public FlyNode(Fighter_main c) {
+    public FlyNode(Fisher_Main c) {
         super(c);
     }
 
@@ -28,11 +28,15 @@ public class FlyNode extends Node {
     @Override
     public boolean validate() {
         // check that fish lvl is equal to or greater than 20 and one has 1000 feathers
-        return (c.getSkills().getRealLevel(Skill.FISHING) >= 20 && c.getInventory().count(FEATHERS) > 200);
+        int numFeathers = c.getInventory().count(FEATHERS);
+        return (c.getSkills().getRealLevel(Skill.FISHING) >= 20 && !c.isCollectFeathers());
     }
 
     @Override
     public int execute() {
+        if (c.getInventory().count(FEATHERS) < 50) {
+            c.setCollectFeathers(true);
+        }
         switch (status) {
             case "get fly rod":
                 c.setStatus("Getting fly fishing rod");
@@ -54,7 +58,7 @@ public class FlyNode extends Node {
                     }
                     break;
                 } else {
-                    c.walkTo(fishingStoreArea, 3000, 5000);
+                    c.walkToRand(fishingStoreArea, 3000, 5000);
 
                     NPC storeKeeper = c.getNpcs().closest("Gerrant");
                     if (storeKeeper != null) {
@@ -71,18 +75,19 @@ public class FlyNode extends Node {
 
             case "fly fish":
                 c.setStatus("Fly Fishing");
-                if (flyArea.contains(c.getLocalPlayer()) && c.getInventory().isFull()) {
+                if (c.getInventory().isFull()) {
                     status = "bank fish";
                     break;
                 } else if (!flyArea.contains(c.getLocalPlayer())) {
-                    c.walkTo(flyArea, 3000, 5000);
+                    c.walkToCenter(flyArea, 3000, 5000);
 
                 } else {
                     NPC flySpot = c.getNpcs().closest("Rod Fishing spot");
-                    if (flySpot != null && flySpot.distance(flyArea.getNearestTile(c.getLocalPlayer())) < 5) {
-                        flySpot.interact("Lure");
-                        c.sleep(1000, 1500);
-                        c.sleepUntil(() -> !c.getLocalPlayer().isAnimating(), 30000);
+                    if (flySpot != null && flySpot.interact("Lure")) {
+                        c.sleepUntil(() -> {
+                            c.sleep(1000, 1500);
+                            return (c.getLocalPlayer().isStandingStill());
+                        }, 30000);
                     }
 
                 }

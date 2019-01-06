@@ -1,11 +1,9 @@
 package Progression_Fisher;
 
-import org.dreambot.api.methods.MethodProvider;
-
 public abstract class Node {
-    protected final Fighter_main c;
+    protected final Fisher_Main c;
 
-    public Node(Fighter_main main){
+    public Node(Fisher_Main main){
         this.c = main;
     }
     public abstract boolean validate();

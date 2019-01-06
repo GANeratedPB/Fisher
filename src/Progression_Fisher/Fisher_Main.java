@@ -14,14 +14,17 @@ import org.dreambot.api.utilities.Timer;
 import java.awt.*;
 import java.util.concurrent.TimeUnit;
 
-@ScriptManifest(name = "GanFigher", version = 0.1, description = "nodes", category = Category.FISHING, author = "GANerated")
-public class Fighter_main extends AbstractScript {
+@ScriptManifest(name = "GanFisher", version = 0.2, description = "Gets you from a fresh account to 99 fishing, no intervention required", category = Category.FISHING, author = "GANerated")
+public class Fisher_Main extends AbstractScript {
+    private ZenAntiBan antiban;
     // times in milliseconds
     private long START_TIME = 0L;
     private long BREAK_TIME = 0L;
     private long PLAY_TIME = 0L;
 
     private long elapsedPlayTime = 0L;
+
+    private boolean collectFeathers = false;
 
     private String state = "Play";
     private String status = "";
@@ -31,20 +34,24 @@ public class Fighter_main extends AbstractScript {
 
     @Override
     public void onStart() {
+        // Instantiate antiban
+        antiban = new ZenAntiBan(this);
 
         START_TIME = System.currentTimeMillis();
         PLAY_TIME = updatedTime(15, 50);
         BREAK_TIME = updatedTime(5, 25);
         nodes = new Node[]{
                 new ShrimpNode(this),
+                new FlyNode(this),
                 new ChickenNode(this),
-                new FlyNode(this)
         };
     }
 
     @Override
     public int onLoop() {
-
+        if (antiban.doRandom()) {         // Check for random flag (for adding extra customized anti-ban features)
+            log("Script-specific random flag triggered");
+        }
 
         switch (state) {
             case "Play":
@@ -83,8 +90,8 @@ public class Fighter_main extends AbstractScript {
                 break;
 
         }
-
-        return 1000;
+        log("here");
+        return antiban.antiBan(); // Call antiban (returns a wait time after perfomring any actions)
     }
 
     @Override
@@ -95,6 +102,8 @@ public class Fighter_main extends AbstractScript {
 
         g.drawString("Time till Break : " + Timer.formatTime(PLAY_TIME - elapsedPlayTime), 10, 35);
         g.drawString("Current Status: " + status, 10, 55);
+
+        g.drawString("Anti-Ban Status : " + (antiban.getStatus().equals("") ? "Inactive" : antiban.getStatus()), 94, 287);
     }
 
     private void disableEvent(RandomEvent event) {
@@ -114,8 +123,18 @@ public class Fighter_main extends AbstractScript {
 
     }
 
-    public void walkTo(Area area, int minSleep, int maxSleep) {
+    public void walkToRand(Area area, int minSleep, int maxSleep) {
         if (getWalking().walk(area.getRandomTile())) {
+            sleepUntil(() -> {
+                sleep(1000);
+                return getLocalPlayer().isStandingStill() || !getLocalPlayer().isAnimating();
+            }, Calculations.random(minSleep, maxSleep));
+        }
+
+    }
+
+    public void walkToCenter(Area area, int minSleep, int maxSleep) {
+        if (getWalking().walk(area.getCenter())) {
             sleepUntil(() -> {
                 sleep(1000);
                 return getLocalPlayer().isStandingStill() || !getLocalPlayer().isAnimating();
@@ -132,4 +151,11 @@ public class Fighter_main extends AbstractScript {
         this.status = status;
     }
 
+    public boolean isCollectFeathers() {
+        return collectFeathers;
+    }
+
+    public void setCollectFeathers(boolean collectFeathers) {
+        this.collectFeathers = collectFeathers;
+    }
 }

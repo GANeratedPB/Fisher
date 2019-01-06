@@ -1,6 +1,6 @@
 package Progression_Fisher.Nodes;
 
-import Progression_Fisher.Fighter_main;
+import Progression_Fisher.Fisher_Main;
 import Progression_Fisher.Node;
 import org.dreambot.api.methods.MethodProvider;
 import org.dreambot.api.methods.map.Area;
@@ -16,7 +16,7 @@ public class ShrimpNode extends Node {
     public static final String SMALL_NET = "Small fishing net";
     public static String status = "inventory dropoff";
 
-    public ShrimpNode(Fighter_main c) {
+    public ShrimpNode(Fisher_Main c) {
         super(c);
     }
 
@@ -67,7 +67,7 @@ public class ShrimpNode extends Node {
                     }
 
                 } else {
-                    c.walkTo(shrimpArea, 3000, 5000);
+                    c.walkToRand(shrimpArea, 3000, 5000);
                 }
                 break;
 
