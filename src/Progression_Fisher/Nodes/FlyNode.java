@@ -86,8 +86,8 @@ public class FlyNode extends Node {
                     if (flySpot != null && flySpot.interact("Lure")) {
                         c.sleepUntil(() -> {
                             c.sleep(1000, 1500);
-                            return (c.getLocalPlayer().isStandingStill());
-                        }, 30000);
+                            return (!c.getLocalPlayer().isMoving() || !c.getLocalPlayer().isAnimating());
+                        }, 20000);
                     }
 
                 }

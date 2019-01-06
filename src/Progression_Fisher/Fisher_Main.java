@@ -28,6 +28,7 @@ public class Fisher_Main extends AbstractScript {
 
     private String state = "Play";
     private String status = "";
+    private String breakDisplay = "";
 
     private Node[] nodes;
 
@@ -56,6 +57,7 @@ public class Fisher_Main extends AbstractScript {
         switch (state) {
             case "Play":
                 elapsedPlayTime = Calculations.elapsed(START_TIME);
+                breakDisplay = "Time till Break : " + Timer.formatTime(PLAY_TIME - elapsedPlayTime);
                 // Once play time is up
                 if (elapsedPlayTime > PLAY_TIME) {
                     PLAY_TIME = updatedTime(15, 50);
@@ -71,11 +73,13 @@ public class Fisher_Main extends AbstractScript {
 
             case "Break":
                 long elapsedBreakTime = Calculations.elapsed(START_TIME);
+                breakDisplay = "Time till Play : " + Timer.formatTime(BREAK_TIME - elapsedPlayTime);
                 if (elapsedBreakTime > BREAK_TIME) {
                     BREAK_TIME = updatedTime(5, 25);
                     START_TIME = System.currentTimeMillis();
                     state = "Login";
                 }
+
                 break;
 
             case "Logout":
@@ -100,10 +104,9 @@ public class Fisher_Main extends AbstractScript {
         g.setColor(Color.CYAN);
         g.setFont(new Font("Arial", Font.PLAIN, 12));
 
-        g.drawString("Time till Break : " + Timer.formatTime(PLAY_TIME - elapsedPlayTime), 10, 35);
+        g.drawString(breakDisplay, 10, 35);
         g.drawString("Current Status: " + status, 10, 55);
 
-        g.drawString("Anti-Ban Status : " + (antiban.getStatus().equals("") ? "Inactive" : antiban.getStatus()), 94, 287);
     }
 
     private void disableEvent(RandomEvent event) {
